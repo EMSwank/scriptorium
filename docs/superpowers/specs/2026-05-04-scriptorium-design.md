@@ -67,7 +67,7 @@ writer.py
 
 ## Section 3: Claude API Integration
 
-**Model:** `claude-sonnet-4-20250514`
+**Model:** `claude-sonnet-4-6`
 
 **Prompt caching** (reduces latency + cost on repeated calls):
 - `cache_control: {"type": "ephemeral"}` on system prompt block

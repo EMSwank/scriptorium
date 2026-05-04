@@ -39,6 +39,12 @@ ANTHROPIC_API_KEY=sk-ant-... .venv/bin/python main.py
 
 Logs are written to `~/Library/Logs/scriptorium.log`. Enable debug logging with `SCRIPTORIUM_DEBUG=1`.
 
+## Troubleshooting
+
+**File lands in `raw/failed/` immediately after dropping**
+
+iCloud may fire a creation event before a large file finishes syncing. If the source device is still uploading, Scriptorium reads partial bytes and routes the file to `failed/`. Re-drop the file once iCloud finishes syncing — it will process correctly.
+
 ## Running as a macOS service (launchd)
 
 1. Copy the plist template and fill in your credentials (run from the cloned `scriptorium/` directory):

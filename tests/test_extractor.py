@@ -57,6 +57,13 @@ def test_extract_pdf_multiple_pages(tmp_path):
     assert result == "Page one\nPage two\n"
 
 
+def test_extract_empty_file_raises(tmp_path):
+    f = tmp_path / "empty.txt"
+    f.write_text("   \n  ", encoding="utf-8")
+    with pytest.raises(ValueError, match=r"No text extracted from empty\.txt"):
+        extract_text(f)
+
+
 def test_extract_unsupported_raises(tmp_path):
     f = tmp_path / "doc.docx"
     f.write_bytes(b"content")

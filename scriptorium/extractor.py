@@ -10,8 +10,12 @@ def extract_text(file_path: Path) -> str:
     if suffix not in _SUPPORTED:
         raise ValueError(f"Unsupported file type: {suffix}")
     if suffix == ".pdf":
-        return _extract_pdf(file_path)
-    return file_path.read_text(encoding="utf-8")
+        text = _extract_pdf(file_path)
+    else:
+        text = file_path.read_text(encoding="utf-8")
+    if not text.strip():
+        raise ValueError(f"No text extracted from {file_path.name}")
+    return text
 
 
 def _extract_pdf(file_path: Path) -> str:

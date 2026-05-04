@@ -1,4 +1,5 @@
 import logging
+import os
 import shutil
 import traceback
 from datetime import datetime
@@ -14,7 +15,9 @@ def write_note(content: str, source_path: Path, wiki_dir: Path, raw_dir: Path) -
         ts = datetime.now().strftime("%Y%m%dT%H%M%S%f")
         output_path = wiki_dir / f"{stem}_{ts}.md"
 
-    output_path.write_text(content, encoding="utf-8")
+    tmp = output_path.with_suffix(".md.tmp")
+    tmp.write_text(content, encoding="utf-8")
+    os.replace(tmp, output_path)
     logger.info("Wrote note: %s", output_path.name)
 
     processed_dir = raw_dir / "processed"
