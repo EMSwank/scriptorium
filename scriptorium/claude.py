@@ -46,7 +46,7 @@ def load_wiki_context(wiki_dir: Path) -> str:
         past_title = False
         for line in lines:
             if not past_title:
-                if line.startswith("#"):
+                if line.startswith("# "):
                     title = line.lstrip("#").strip()
                     past_title = True
                 continue

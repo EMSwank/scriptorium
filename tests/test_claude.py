@@ -1,7 +1,4 @@
-from pathlib import Path
 from unittest.mock import MagicMock
-
-import pytest
 
 from scriptorium.claude import SYSTEM_PROMPT, generate_note, load_wiki_context
 
@@ -19,6 +16,7 @@ def test_load_wiki_context_reads_title_and_first_paragraph(tmp_path):
     assert "[[Alpha Note]]" in result
     assert "first paragraph" in result
     assert "Second paragraph" not in result
+    assert "[[Alpha Note]]: This is the first paragraph." in result
 
 
 def test_load_wiki_context_multiple_notes(tmp_path):
