@@ -2,7 +2,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-from watchdog.events import DirCreatedEvent, FileCreatedEvent
+from watchdog.events import DirCreatedEvent, FileCreatedEvent, FileModifiedEvent
 
 from scriptorium.watcher import ScriptoriumHandler
 
@@ -68,7 +68,6 @@ def test_processes_uppercase_extension(handler):
 
 
 def test_on_modified_ignored(handler):
-    from watchdog.events import FileModifiedEvent
     with patch.object(handler, "_process") as mock_process:
         handler.on_modified(FileModifiedEvent("/raw/doc.txt"))
         mock_process.assert_not_called()
@@ -104,3 +103,15 @@ def test_process_routes_errors_to_failed(handler, tmp_path):
         handler._process(source)
 
     mock_failed.assert_called_once_with(source, handler.raw_dir, err)
+
+
+def test_process_move_to_failed_secondary_exception_does_not_propagate(handler, tmp_path):
+    source = tmp_path / "raw" / "bad.txt"
+    source.write_text("content", encoding="utf-8")
+
+    with (
+        patch("scriptorium.watcher.extract_text", side_effect=ValueError("pipeline fail")),
+        patch("scriptorium.watcher.move_to_failed", side_effect=OSError("disk full")),
+    ):
+        # Must not raise — secondary exception in move_to_failed is swallowed and logged
+        handler._process(source)
