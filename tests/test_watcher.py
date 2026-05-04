@@ -60,6 +60,20 @@ def test_processes_md(handler):
         mock_process.assert_called_once_with(Path("/raw/notes.md"))
 
 
+def test_processes_uppercase_extension(handler):
+    event = FileCreatedEvent("/raw/report.PDF")
+    with patch.object(handler, "_process") as mock_process:
+        handler.on_created(event)
+        mock_process.assert_called_once_with(Path("/raw/report.PDF"))
+
+
+def test_on_modified_ignored(handler):
+    from watchdog.events import FileModifiedEvent
+    with patch.object(handler, "_process") as mock_process:
+        handler.on_modified(FileModifiedEvent("/raw/doc.txt"))
+        mock_process.assert_not_called()
+
+
 def test_process_calls_pipeline(handler, tmp_path):
     source = tmp_path / "raw" / "doc.txt"
     source.write_text("content", encoding="utf-8")

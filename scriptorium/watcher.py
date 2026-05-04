@@ -10,6 +10,7 @@ from scriptorium.writer import move_to_failed, write_note
 
 logger = logging.getLogger(__name__)
 
+# Mirrors extractor._SUPPORTED — intentionally decoupled so watcher and extractor can evolve independently
 _SUPPORTED_SUFFIXES = {".pdf", ".txt", ".md"}
 
 
@@ -39,4 +40,7 @@ class ScriptoriumHandler(FileSystemEventHandler):
             write_note(content, path, self.wiki_dir, self.raw_dir)
         except Exception as e:
             logger.exception("Error processing %s", path.name)
-            move_to_failed(path, self.raw_dir, e)
+            try:
+                move_to_failed(path, self.raw_dir, e)
+            except Exception:
+                logger.exception("Failed to route %s to failed/", path.name)
