@@ -60,5 +60,13 @@ def test_extract_pdf_multiple_pages(tmp_path):
 def test_extract_unsupported_raises(tmp_path):
     f = tmp_path / "doc.docx"
     f.write_bytes(b"content")
-    with pytest.raises(ValueError, match="Unsupported file type: .docx"):
+    with pytest.raises(ValueError, match=r"Unsupported file type: \.docx"):
         extract_text(f)
+
+
+def test_extract_pdf_real_file():
+    fixture = Path(__file__).parent / "fixtures" / "sample.pdf"
+    result = extract_text(fixture)
+    assert isinstance(result, str)
+    assert len(result) > 0
+    assert "scriptorium" in result.lower()
