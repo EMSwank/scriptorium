@@ -1,7 +1,4 @@
-import shutil
 from pathlib import Path
-
-import pytest
 
 from scriptorium.writer import move_to_failed, write_note
 
@@ -52,6 +49,7 @@ def test_write_note_collision_creates_second_file(tmp_path):
     md_files = sorted(wiki_dir.glob("*.md"))
     assert len(md_files) == 2
     assert md_files[0].name == "doc.md"  # original untouched
+    assert md_files[0].read_text(encoding="utf-8") == "existing note"
     assert md_files[1].read_text(encoding="utf-8") == "# Note 2"
 
 
@@ -104,3 +102,22 @@ def test_move_to_failed_creates_failed_dir_if_missing(tmp_path):
         move_to_failed(source, raw_dir, e)
 
     assert (raw_dir / "failed" / "bad.txt").exists()
+
+
+def test_write_note_no_processed_collision(tmp_path):
+    wiki_dir, raw_dir = _make_dirs(tmp_path)
+
+    # First file — lands in processed/doc.txt
+    source1 = raw_dir / "doc.txt"
+    source1.write_text("first", encoding="utf-8")
+    write_note("# Note 1", source1, wiki_dir, raw_dir)
+
+    # Second drop with same name while processed/doc.txt still exists
+    source2 = raw_dir / "doc.txt"
+    source2.write_text("second", encoding="utf-8")
+    write_note("# Note 2", source2, wiki_dir, raw_dir)
+
+    processed_files = list((raw_dir / "processed").glob("doc*"))
+    assert len(processed_files) == 2
+    # Original processed copy must not have been overwritten
+    assert (raw_dir / "processed" / "doc.txt").read_text(encoding="utf-8") == "first"
