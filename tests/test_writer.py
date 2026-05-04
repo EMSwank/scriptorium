@@ -121,3 +121,37 @@ def test_write_note_no_processed_collision(tmp_path):
     assert len(processed_files) == 2
     # Original processed copy must not have been overwritten
     assert (raw_dir / "processed" / "doc.txt").read_text(encoding="utf-8") == "first"
+
+
+def test_move_to_failed_no_collision(tmp_path):
+    wiki_dir, raw_dir = _make_dirs(tmp_path)
+
+    # Pre-populate failed/ with an existing file of the same name
+    existing = raw_dir / "failed" / "bad.txt"
+    existing.write_text("original failed content", encoding="utf-8")
+
+    source = raw_dir / "bad.txt"
+    source.write_text("new bad content", encoding="utf-8")
+
+    try:
+        raise ValueError("second failure")
+    except ValueError as e:
+        move_to_failed(source, raw_dir, e)
+
+    # Original file in failed/ must be untouched
+    assert existing.read_text(encoding="utf-8") == "original failed content"
+
+    # A renamed copy must exist
+    renamed_files = [
+        f for f in (raw_dir / "failed").iterdir()
+        if f.name != "bad.txt" and f.suffix == ".txt"
+    ]
+    assert len(renamed_files) == 1
+
+    # The .error.log must match the renamed file's name (not the original)
+    renamed_name = renamed_files[0].name
+    error_log = raw_dir / "failed" / f"{renamed_name}.error.log"
+    assert error_log.exists(), f"Expected error log: {renamed_name}.error.log"
+    log_text = error_log.read_text(encoding="utf-8")
+    assert "ValueError" in log_text
+    assert "second failure" in log_text
