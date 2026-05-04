@@ -41,15 +41,15 @@ Logs are written to `~/Library/Logs/scriptorium.log`. Enable debug logging with 
 
 ## Running as a macOS service (launchd)
 
-1. Copy and edit the plist template:
+1. Copy the plist template and fill in your credentials (run from the cloned `scriptorium/` directory):
 
    ```bash
    cp com.scriptorium.watcher.plist ~/Library/LaunchAgents/
+   # Replace all four YOUR_USERNAME placeholders with your actual username:
+   sed -i '' "s/YOUR_USERNAME/$(whoami)/g" ~/Library/LaunchAgents/com.scriptorium.watcher.plist
    ```
 
-   Open `~/Library/LaunchAgents/com.scriptorium.watcher.plist` and replace:
-   - `YOUR_USERNAME` with your macOS username (run `whoami` if unsure)
-   - `YOUR_API_KEY_HERE` with your Anthropic API key
+   Then open `~/Library/LaunchAgents/com.scriptorium.watcher.plist` and replace `YOUR_API_KEY_HERE` with your Anthropic API key.
 
 2. Load the service:
 
