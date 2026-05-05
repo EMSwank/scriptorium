@@ -12,6 +12,26 @@ Drop a PDF, text file, or markdown document into the `raw/` folder. Scriptorium 
 - An [Anthropic API key](https://console.anthropic.com/)
 - Obsidian with iCloud sync enabled
 
+## Obsidian setup
+
+1. **Create or open a vault stored in iCloud Drive.** In Obsidian → Open another vault → Create new vault, set the location to somewhere inside `iCloud Drive/`. Obsidian will store it at:
+   ```
+   ~/Library/Mobile Documents/iCloud~md~obsidian/Documents/<vault-name>/
+   ```
+
+2. **Confirm the path matches.** Scriptorium watches:
+   ```
+   ~/Library/Mobile Documents/iCloud~md~obsidian/Documents/wiki/raw/
+   ```
+   Your vault must be named `wiki`. To use a different name, update `WIKI_DIR` and `RAW_DIR` in `main.py` before running.
+
+3. **Create the `raw/` folder** inside your vault (Obsidian won't create it automatically):
+   ```bash
+   mkdir -p ~/Library/Mobile\ Documents/iCloud\~md\~obsidian/Documents/wiki/raw
+   ```
+
+4. **Exclude `raw/` from Obsidian's file explorer** so processed and failed source files don't clutter your vault view: Obsidian → Settings → Files & Links → Excluded files → add `raw`.
+
 ## Folder layout
 
 ```
