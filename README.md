@@ -25,7 +25,7 @@ Drop a PDF, text file, or markdown document into the `raw/` folder. Scriptorium 
 ## Installation
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/scriptorium.git
+git clone https://github.com/EMSwank/scriptorium.git
 cd scriptorium
 uv venv
 uv pip install -e .
