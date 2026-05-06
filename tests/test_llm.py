@@ -168,3 +168,15 @@ def test_generate_note_openai_compat_no_cache_control():
     kwargs = mock_client.chat.completions.create.call_args.kwargs
     for msg in kwargs["messages"]:
         assert "cache_control" not in msg
+
+
+def test_generate_note_openai_compat_raises_on_none_content():
+    config = LLMConfig(provider="openai", model="gpt-4o-mini", api_key="sk-test", base_url=None)
+    mock_client = MagicMock()
+    mock_client.chat.completions.create.return_value = MagicMock(
+        choices=[MagicMock(message=MagicMock(content=None))],
+        usage=MagicMock(),
+    )
+    with patch("scriptorium.llm.openai.OpenAI", return_value=mock_client):
+        with pytest.raises(RuntimeError, match="returned no text content"):
+            generate_note("text", "doc.txt", "", config)

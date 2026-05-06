@@ -143,4 +143,7 @@ def _generate_openai_compat(
         ],
     )
     logger.debug("API usage: %s", response.usage)
-    return response.choices[0].message.content
+    content = response.choices[0].message.content
+    if content is None:
+        raise RuntimeError(f"{config.provider} returned no text content")
+    return content
