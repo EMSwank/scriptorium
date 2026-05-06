@@ -4,6 +4,7 @@ from unittest.mock import patch
 import pytest
 from watchdog.events import DirCreatedEvent, FileCreatedEvent, FileModifiedEvent
 
+from scriptorium.config import LLMConfig
 from scriptorium.watcher import ScriptoriumHandler
 
 
@@ -13,9 +14,10 @@ def handler(tmp_path):
     wiki_dir.mkdir()
     raw_dir = tmp_path / "raw"
     raw_dir.mkdir()
-    with patch("scriptorium.watcher.anthropic.Anthropic"):
-        h = ScriptoriumHandler(wiki_dir=wiki_dir, raw_dir=raw_dir, api_key="test-key")
-    return h
+    config = LLMConfig(
+        provider="anthropic", model="claude-sonnet-4-6", api_key="test-key", base_url=None
+    )
+    return ScriptoriumHandler(wiki_dir=wiki_dir, raw_dir=raw_dir, config=config)
 
 
 def test_ignores_directories(handler):
@@ -87,7 +89,7 @@ def test_process_calls_pipeline(handler, tmp_path):
 
     mock_extract.assert_called_once_with(source)
     mock_ctx.assert_called_once_with(handler.wiki_dir)
-    mock_gen.assert_called_once_with("extracted", "doc.txt", "context", handler.client)
+    mock_gen.assert_called_once_with("extracted", "doc.txt", "context", handler.config)
     mock_write.assert_called_once_with("# Note", source, handler.wiki_dir, handler.raw_dir)
 
 
