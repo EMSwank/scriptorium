@@ -34,7 +34,7 @@ def test_gemini_defaults():
 def test_ollama_defaults():
     config = build_config({"LLM_PROVIDER": "ollama"})
     assert config.provider == "ollama"
-    assert config.model == "gemma4:e2b"
+    assert config.model == "gemma4:e4b"
     assert config.api_key is None
     assert config.base_url == "http://localhost:11434/v1"
 

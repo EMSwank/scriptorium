@@ -18,7 +18,7 @@ _PROVIDERS: dict[str, dict] = {
         "key_env": "GEMINI_API_KEY",
     },
     "ollama": {
-        "model": "gemma4:e2b",
+        "model": "gemma4:e4b",
         "base_url": "http://localhost:11434/v1",
         "key_env": None,
     },

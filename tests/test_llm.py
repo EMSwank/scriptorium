@@ -134,7 +134,7 @@ def test_generate_note_anthropic_raises_on_empty_content():
 @pytest.mark.parametrize("provider,model,api_key,base_url", [
     ("openai", "gpt-4o-mini", "sk-test", None),
     ("gemini", "gemini-2.0-flash", "gemini-key", "https://generativelanguage.googleapis.com/v1beta/openai/"),
-    ("ollama", "gemma4:e2b", None, "http://localhost:11434/v1"),
+    ("ollama", "gemma4:e4b", None, "http://localhost:11434/v1"),
 ])
 def test_generate_note_openai_compat_returns_text(provider, model, api_key, base_url):
     config = LLMConfig(provider=provider, model=model, api_key=api_key, base_url=base_url)
@@ -151,7 +151,7 @@ def test_generate_note_openai_compat_returns_text(provider, model, api_key, base
 @pytest.mark.parametrize("provider,model,api_key,base_url", [
     ("openai", "gpt-4o-mini", "sk-test", None),
     ("gemini", "gemini-2.0-flash", "gemini-key", "https://generativelanguage.googleapis.com/v1beta/openai/"),
-    ("ollama", "gemma4:e2b", None, "http://localhost:11434/v1"),
+    ("ollama", "gemma4:e4b", None, "http://localhost:11434/v1"),
 ])
 def test_generate_note_openai_compat_client_args(provider, model, api_key, base_url):
     config = LLMConfig(provider=provider, model=model, api_key=api_key, base_url=base_url)

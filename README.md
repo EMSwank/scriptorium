@@ -130,7 +130,7 @@ By default Scriptorium uses Anthropic Claude. Set `LLM_PROVIDER` to switch provi
 | `anthropic` | `claude-sonnet-4-6` | Prompt caching enabled |
 | `openai` | `gpt-4o-mini` | OpenAI-compatible |
 | `gemini` | `gemini-2.0-flash` | Uses Gemini's OpenAI-compatible endpoint |
-| `ollama` | `gemma4:e2b` | Local inference; no API key required |
+| `ollama` | `gemma4:e4b` | Local inference; no API key required |
 
 ### Examples
 
@@ -146,7 +146,7 @@ LLM_PROVIDER=gemini GEMINI_API_KEY=AIza... .venv/bin/python main.py
 
 **Ollama (local):**
 ```bash
-# Pull the model first: ollama pull gemma4:e2b
+# Pull the model first: ollama pull gemma4:e4b
 LLM_PROVIDER=ollama .venv/bin/python main.py
 ```
 
