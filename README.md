@@ -1,8 +1,8 @@
 # Scriptorium
 
-A macOS background service that watches your Obsidian vault for new files and converts them into structured wiki notes using an LLM API (Claude, OpenAI, Gemini, or a local model via Ollama).
+Drop a PDF into a folder. A structured wiki note is waiting in Obsidian when you come back.
 
-Drop a PDF, text file, or markdown document into the `raw/` folder. Scriptorium extracts the text, generates a structured note with a summary, key concepts, and wikilinks, and saves it to your wiki. The source file moves to `raw/processed/`.
+Scriptorium is a macOS background service that watches your vault for new files, extracts the text, calls an LLM (Claude, OpenAI, Gemini, or a local model via Ollama), and writes a formatted note with a summary, key concepts, and wikilinks. The source file moves to `raw/processed/` when done.
 
 ## Prerequisites
 
@@ -13,6 +13,8 @@ Drop a PDF, text file, or markdown document into the `raw/` folder. Scriptorium 
 - Obsidian with iCloud sync enabled
 
 ## Obsidian setup
+
+Two minutes to configure. You won't touch this again.
 
 1. **Create or open a vault stored in iCloud Drive.** In Obsidian → Open another vault → Create new vault, set the location to somewhere inside `iCloud Drive/`. Obsidian will store it at:
    ```
@@ -53,6 +55,8 @@ uv pip install -e .
 
 ## Running manually
 
+Good for testing. For daily use, skip to [Running as a macOS service](#running-as-a-macos-service-launchd).
+
 ```bash
 ANTHROPIC_API_KEY=sk-ant-... .venv/bin/python main.py
 ```
@@ -66,6 +70,8 @@ Logs are written to `~/Library/Logs/scriptorium.log`. Enable debug logging with 
 iCloud may fire a creation event before a large file finishes syncing. If the source device is still uploading, Scriptorium reads partial bytes and routes the file to `failed/`. Re-drop the file once iCloud finishes syncing — it will process correctly.
 
 ## Running as a macOS service (launchd)
+
+Set it up once. After that, Scriptorium starts on login and runs invisibly.
 
 1. Copy the plist template and fill in your credentials (run from the cloned `scriptorium/` directory):
 
@@ -150,6 +156,8 @@ LLM_PROVIDER=anthropic LLM_MODEL=claude-opus-4-7 ANTHROPIC_API_KEY=sk-ant-... .v
 ```
 
 ## Generated note format
+
+Every processed file produces this:
 
 ```markdown
 # Title
