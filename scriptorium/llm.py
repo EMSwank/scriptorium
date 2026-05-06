@@ -113,6 +113,8 @@ def _generate_anthropic(
         messages=[{"role": "user", "content": user_content}],
     )
     logger.debug("API usage: %s", response.usage)
+    if not response.content:
+        raise RuntimeError("anthropic returned no content blocks")
     return response.content[0].text
 
 

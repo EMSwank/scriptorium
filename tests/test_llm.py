@@ -117,6 +117,18 @@ def test_generate_note_anthropic_no_wiki_context_omits_context_block():
     assert "cache_control" not in user_content[0]
 
 
+def test_generate_note_anthropic_raises_on_empty_content():
+    config = _anthropic_config()
+    mock_client = MagicMock()
+    mock_client.messages.create.return_value = MagicMock(
+        content=[],
+        usage=MagicMock(),
+    )
+    with patch("scriptorium.llm.anthropic.Anthropic", return_value=mock_client):
+        with pytest.raises(RuntimeError, match="no content blocks"):
+            generate_note("text", "doc.txt", "", config)
+
+
 # ── OpenAI-compatible path ────────────────────────────────────────────────────
 
 @pytest.mark.parametrize("provider,model,api_key,base_url", [
@@ -180,3 +192,17 @@ def test_generate_note_openai_compat_raises_on_none_content():
     with patch("scriptorium.llm.openai.OpenAI", return_value=mock_client):
         with pytest.raises(RuntimeError, match="returned no text content"):
             generate_note("text", "doc.txt", "", config)
+
+
+def test_generate_note_openai_compat_wiki_context_in_user_message():
+    config = LLMConfig(provider="openai", model="gpt-4o-mini", api_key="sk-test", base_url=None)
+    mock_client = MagicMock()
+    mock_client.chat.completions.create.return_value = MagicMock(
+        choices=[MagicMock(message=MagicMock(content="# Note"))],
+        usage=MagicMock(),
+    )
+    with patch("scriptorium.llm.openai.OpenAI", return_value=mock_client):
+        generate_note("text", "doc.txt", "Existing notes: [[Alpha]]", config)
+    kwargs = mock_client.chat.completions.create.call_args.kwargs
+    user_message = kwargs["messages"][1]["content"]
+    assert "Existing notes: [[Alpha]]" in user_message
