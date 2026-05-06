@@ -1,6 +1,6 @@
 # Scriptorium
 
-A macOS background service that watches your Obsidian vault for new files and converts them into structured wiki notes using the Claude API.
+A macOS background service that watches your Obsidian vault for new files and converts them into structured wiki notes using an LLM API (Claude, OpenAI, Gemini, or a local model via Ollama).
 
 Drop a PDF, text file, or markdown document into the `raw/` folder. Scriptorium extracts the text, generates a structured note with a summary, key concepts, and wikilinks, and saves it to your wiki. The source file moves to `raw/processed/`.
 
@@ -9,7 +9,7 @@ Drop a PDF, text file, or markdown document into the `raw/` folder. Scriptorium 
 - macOS 13+
 - Python 3.11+
 - [uv](https://github.com/astral-sh/uv)
-- An [Anthropic API key](https://console.anthropic.com/)
+- An API key for your chosen LLM provider (Anthropic by default — [get one here](https://console.anthropic.com/))
 - Obsidian with iCloud sync enabled
 
 ## Obsidian setup
@@ -75,7 +75,7 @@ iCloud may fire a creation event before a large file finishes syncing. If the so
    sed -i '' "s/YOUR_USERNAME/$(whoami)/g" ~/Library/LaunchAgents/com.scriptorium.watcher.plist
    ```
 
-   Then open `~/Library/LaunchAgents/com.scriptorium.watcher.plist` and replace `YOUR_API_KEY_HERE` with your Anthropic API key.
+   Then open `~/Library/LaunchAgents/com.scriptorium.watcher.plist` and replace `YOUR_API_KEY_HERE` with your Anthropic API key. For non-Anthropic providers, set the relevant key variable instead (e.g., `OPENAI_API_KEY`) and add `LLM_PROVIDER` with the provider name.
 
 2. Load the service:
 
@@ -103,6 +103,51 @@ iCloud may fire a creation event before a large file finishes syncing. If the so
 | `.pdf`    | pdfplumber |
 | `.txt`    | UTF-8 read |
 | `.md`     | UTF-8 read |
+
+## LLM Provider Configuration
+
+By default Scriptorium uses Anthropic Claude. Set `LLM_PROVIDER` to switch providers.
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `LLM_PROVIDER` | `anthropic` | `anthropic`, `openai`, `gemini`, or `ollama` |
+| `LLM_MODEL` | Provider default | Override the model name |
+| `LLM_BASE_URL` | Provider default | Override the API base URL |
+| `ANTHROPIC_API_KEY` | — | Required when `LLM_PROVIDER=anthropic` |
+| `OPENAI_API_KEY` | — | Required when `LLM_PROVIDER=openai` |
+| `GEMINI_API_KEY` | — | Required when `LLM_PROVIDER=gemini` |
+
+### Provider defaults
+
+| Provider | Default model | Notes |
+|----------|--------------|-------|
+| `anthropic` | `claude-sonnet-4-6` | Prompt caching enabled |
+| `openai` | `gpt-4o-mini` | OpenAI-compatible |
+| `gemini` | `gemini-2.0-flash` | Uses Gemini's OpenAI-compatible endpoint |
+| `ollama` | `gemma4:e2b` | Local inference; no API key required |
+
+### Examples
+
+**OpenAI:**
+```bash
+LLM_PROVIDER=openai OPENAI_API_KEY=sk-... .venv/bin/python main.py
+```
+
+**Gemini:**
+```bash
+LLM_PROVIDER=gemini GEMINI_API_KEY=AIza... .venv/bin/python main.py
+```
+
+**Ollama (local):**
+```bash
+# Pull the model first: ollama pull gemma4:e2b
+LLM_PROVIDER=ollama .venv/bin/python main.py
+```
+
+**Custom model:**
+```bash
+LLM_PROVIDER=anthropic LLM_MODEL=claude-opus-4-7 ANTHROPIC_API_KEY=sk-ant-... .venv/bin/python main.py
+```
 
 ## Generated note format
 

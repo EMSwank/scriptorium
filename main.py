@@ -1,11 +1,11 @@
 import logging
 import os
-import sys
 import time
 from pathlib import Path
 
 from watchdog.observers import Observer
 
+from scriptorium.config import build_config
 from scriptorium.watcher import ScriptoriumHandler
 
 RAW_DIR = Path(
@@ -29,18 +29,20 @@ def setup_logging() -> None:
 
 
 def main() -> None:
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not api_key:
-        sys.exit("Error: ANTHROPIC_API_KEY environment variable is not set")
+    config = build_config(os.environ)
 
     setup_logging()
     logger = logging.getLogger(__name__)
-    logger.info("Starting Scriptorium")
+    logger.info(
+        "Starting Scriptorium provider=%s model=%s",
+        config.provider,
+        config.model,
+    )
 
     (RAW_DIR / "processed").mkdir(parents=True, exist_ok=True)
     (RAW_DIR / "failed").mkdir(parents=True, exist_ok=True)
 
-    handler = ScriptoriumHandler(wiki_dir=WIKI_DIR, raw_dir=RAW_DIR, api_key=api_key)
+    handler = ScriptoriumHandler(wiki_dir=WIKI_DIR, raw_dir=RAW_DIR, config=config)
     observer = Observer()
     observer.schedule(handler, str(RAW_DIR), recursive=False)
     observer.start()

@@ -3,6 +3,9 @@ import logging
 from pathlib import Path
 
 import anthropic
+import openai
+
+from scriptorium.config import LLMConfig
 
 logger = logging.getLogger(__name__)
 
@@ -67,11 +70,22 @@ def generate_note(
     text: str,
     source_filename: str,
     wiki_context: str,
-    client: anthropic.Anthropic,
+    config: LLMConfig,
 ) -> str:
+    if config.provider == "anthropic":
+        return _generate_anthropic(text, source_filename, wiki_context, config)
+    return _generate_openai_compat(text, source_filename, wiki_context, config)
+
+
+def _generate_anthropic(
+    text: str,
+    source_filename: str,
+    wiki_context: str,
+    config: LLMConfig,
+) -> str:
+    client = anthropic.Anthropic(api_key=config.api_key)
     today = datetime.date.today().isoformat()
     user_content: list[dict] = []
-
     if wiki_context:
         user_content.append(
             {
@@ -80,16 +94,14 @@ def generate_note(
                 "cache_control": {"type": "ephemeral"},
             }
         )
-
     user_content.append(
         {
             "type": "text",
             "text": f"Today's date: {today}\nFilename: {source_filename}\n\n---\n\n{text}",
         }
     )
-
     response = client.messages.create(
-        model="claude-sonnet-4-6",
+        model=config.model,
         max_tokens=4096,
         system=[
             {
@@ -101,4 +113,39 @@ def generate_note(
         messages=[{"role": "user", "content": user_content}],
     )
     logger.debug("API usage: %s", response.usage)
+    if not response.content:
+        raise RuntimeError("anthropic returned no content blocks")
     return response.content[0].text
+
+
+def _generate_openai_compat(
+    text: str,
+    source_filename: str,
+    wiki_context: str,
+    config: LLMConfig,
+) -> str:
+    # OpenAI SDK requires a non-empty api_key; "ollama" is a harmless placeholder
+    client = openai.OpenAI(
+        api_key=config.api_key or "ollama",
+        base_url=config.base_url,
+    )
+    today = datetime.date.today().isoformat()
+    user_parts: list[str] = []
+    if wiki_context:
+        user_parts.append(wiki_context)
+    user_parts.append(
+        f"Today's date: {today}\nFilename: {source_filename}\n\n---\n\n{text}"
+    )
+    response = client.chat.completions.create(
+        model=config.model,
+        max_tokens=4096,
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": "\n\n".join(user_parts)},
+        ],
+    )
+    logger.debug("API usage: %s", response.usage)
+    content = response.choices[0].message.content
+    if content is None:
+        raise RuntimeError(f"{config.provider} returned no text content")
+    return content
